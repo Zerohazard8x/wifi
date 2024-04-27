@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
+    <name>Maccas Free Wi-fi</name>
+    <SSIDConfig>
+        <SSID>
+            <name>Maccas Free Wi-fi</name>
+        </SSID>
+    </SSIDConfig>
+    <connectionType>ESS</connectionType>
+    <connectionMode>auto</connectionMode>
+    <MSM>
+        <security>
+            <authEncryption>
+                <authentication>open</authentication>
+                <encryption>none</encryption>
+                <useOneX>false</useOneX>
+            </authEncryption>
+        </security>
+    </MSM>
+    <MacRandomization xmlns="http://www.microsoft.com/networking/WLAN/profile/v3">
+        <enableRandomization>true</enableRandomization>
+    </MacRandomization>
+</WLANProfile>
