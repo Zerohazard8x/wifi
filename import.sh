@@ -58,6 +58,9 @@ add_wifi_network "skynetglobal"
 add_wifi_network "Sydney Tower - Guest"
 add_wifi_network "Taronga Guest WiFi"
 add_wifi_network "Telstra"
+add_wifi_network "Apple Demo"
+add_wifi_network "Apple Store"
+add_wifi_network "Hungry Jack's FREE WiFi"
 
 # Restore SELinux state
 setenforce "$old_se"
