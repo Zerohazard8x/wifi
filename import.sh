@@ -61,6 +61,8 @@ add_wifi_network "Telstra"
 add_wifi_network "Apple Demo"
 add_wifi_network "Apple Store"
 add_wifi_network "Hungry Jack's FREE WiFi"
+add_wifi_network "@EVIAFreeWiFi"
+add_wifi_network "CircuitLaneFreeWIFI4ALL"
 
 # Restore SELinux state
 setenforce "$old_se"
