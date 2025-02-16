@@ -35,11 +35,11 @@ EOF
     echo "'$file_name' created"
 }
 
-# android
-# https://github.com/steinwurf/adb-join-wifi
-# create_wifi_profile() {
-#     adb shell am start -n com.steinwurf.adbjoinwifi/.MainActivity -e ssid $1
-# }
+android
+https://github.com/steinwurf/adb-join-wifi
+create_wifi_profile() {
+    adb shell "am start -n com.steinwurf.adbjoinwifi/.MainActivity -e ssid \'$1\'"
+}
 
 create_wifi_profile "#Wifi@Jewel"
 create_wifi_profile "_DarlingSquareFreeWifi_"
