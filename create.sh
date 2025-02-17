@@ -37,11 +37,8 @@ EOF
 
 # android
 create_wifi_profile() {
-    local ssid password
-    ssid=$(printf '%q' "$1")
-    # NOTE: replace " " with "\ "
     # adb shell "am start -n com.steinwurf.adbjoinwifi/.MainActivity -e ssid $ssid" # https://github.com/steinwurf/adb-join-wifi
-    adb shell "am start -n com.adbwifisettingsmanager/.WifiSettingsManagerActivity --esn newConnection -e ssid $ssid" # https://github.com/pr4bh4sh/adb-wifi-setting-manager
+    adb shell "am start -n com.adbwifisettingsmanager/.WifiSettingsManagerActivity --esn newConnection -e ssid $(printf '%q' "$1")" # https://github.com/pr4bh4sh/adb-wifi-setting-manager
 }
 
 create_wifi_profile "#Wifi@Jewel"
