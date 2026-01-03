@@ -6,14 +6,26 @@ function Add-WifiNetwork {
         [string]$Ssid
     )
 
-    # Mirror create.sh: file name pattern "Wi-Fi-<ssid>.xml"
-    # (but make it filesystem-safe so SSIDs like "A/B" won't break file creation)
-    $invalid = [IO.Path]::GetInvalidFileNameChars()
-    $safeSsidForFile = ($Ssid.ToCharArray() | ForEach-Object { if ($invalid -contains $_) { '_' } else { $_ } }) -join ''
-    $xmlFile = "Wi-Fi-$safeSsidForFile.xml"
+    # Resolve %USERPROFILE%\Downloads explicitly
+    $downloads = Join-Path $env:USERPROFILE "Downloads"
 
-    # Mirror create.sh: open network profile + MAC randomization block
+    # Be defensive: ensure Downloads exists
+    if (-not (Test-Path $downloads)) {
+        New-Item -ItemType Directory -Path $downloads | Out-Null
+    }
+
+    # Make SSID safe for filenames
+    $invalidChars = [IO.Path]::GetInvalidFileNameChars()
+    $safeSsid = ($Ssid.ToCharArray() | ForEach-Object {
+        if ($invalidChars -contains $_) { '_' } else { $_ }
+    }) -join ''
+
+    $xmlPath = Join-Path $downloads "Wi-Fi-$safeSsid.xml"
+
+    # Escape SSID for XML correctness
     $escapedSsid = [System.Security.SecurityElement]::Escape($Ssid)
+
+    # Open Wi-Fi profile with MAC randomization
     $xml = @"
 <?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
@@ -40,13 +52,21 @@ function Add-WifiNetwork {
 </WLANProfile>
 "@
 
-    $xml | Out-File -FilePath $xmlFile -Encoding UTF8 -Force
+    # Write XML (create.sh role)
+    $xml | Out-File -FilePath $xmlPath -Encoding UTF8 -Force
 
-    # Mirror import.ps1: import using netsh
-    netsh wlan add profile filename="$xmlFile"
+    try {
+        # Import profile (import.ps1 role)
+        netsh wlan add profile filename="$xmlPath"
+    }
+    finally {
+        # Always clean up the XML
+        if (Test-Path $xmlPath) {
+            Remove-Item -Path $xmlPath -Force
+        }
+    }
 }
 
-# Example:
 Add-WifiNetwork "WiFi_Chefexpress"
 Add-WifiNetwork "WiFi Frecciarossa"
 Add-WifiNetwork "WiFi Frecciargento"
