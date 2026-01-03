@@ -88,4 +88,4 @@ import_wifi_profile "_WorldSquareFreeWifi_"
 import_wifi_profile "_FREE Smart WiFi @NAIA3"
 import_wifi_profile "_Free JFK WiFi"
 import_wifi_profile "_Free EWR Wifi"
-import_wifi_profile "_DarlingSquareFreeWifi_
+import_wifi_profile "_DarlingSquareFreeWifi_"

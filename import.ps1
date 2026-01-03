@@ -129,4 +129,4 @@ Add-WifiNetwork "_WorldSquareFreeWifi_"
 Add-WifiNetwork "_FREE Smart WiFi @NAIA3"
 Add-WifiNetwork "_Free JFK WiFi"
 Add-WifiNetwork "_Free EWR Wifi"
-Add-WifiNetwork "_DarlingSquareFreeWifi_
+Add-WifiNetwork "_DarlingSquareFreeWifi_"

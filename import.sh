@@ -117,7 +117,7 @@ add_wifi_network "_WorldSquareFreeWifi_"
 add_wifi_network "_FREE Smart WiFi @NAIA3"
 add_wifi_network "_Free JFK WiFi"
 add_wifi_network "_Free EWR Wifi"
-add_wifi_network "_DarlingSquareFreeWifi_
+add_wifi_network "_DarlingSquareFreeWifi_"
 
 # Restore SELinux state
 setenforce "$old_se"
