@@ -3,29 +3,67 @@ Set-StrictMode -Version Latest
 function Add-WifiNetwork {
     param(
         [Parameter(Mandatory = $true, Position = 0)]
-        [string]$Ssid
+        [string]$Ssid,
+
+        # Optional WPA2 password (PSK). If omitted/empty => OPEN network profile.
+        [Parameter(Mandatory = $false, Position = 1)]
+        [string]$Password
     )
 
-    # Resolve %USERPROFILE%\Downloads explicitly
+    # Resolve %USERPROFILE%\Downloads
     $downloads = Join-Path $env:USERPROFILE "Downloads"
-
-    # Be defensive: ensure Downloads exists
     if (-not (Test-Path $downloads)) {
         New-Item -ItemType Directory -Path $downloads | Out-Null
     }
 
-    # Make SSID safe for filenames
+    # Make SSID filesystem-safe for the XML filename
     $invalidChars = [IO.Path]::GetInvalidFileNameChars()
-    $safeSsid = ($Ssid.ToCharArray() | ForEach-Object {
+    $safeSsidForFile = ($Ssid.ToCharArray() | ForEach-Object {
         if ($invalidChars -contains $_) { '_' } else { $_ }
     }) -join ''
 
-    $xmlPath = Join-Path $downloads "Wi-Fi-$safeSsid.xml"
+    $xmlPath = Join-Path $downloads "Wi-Fi-$safeSsidForFile.xml"
 
-    # Escape SSID for XML correctness
+    # Escape SSID/password for XML element content
     $escapedSsid = [System.Security.SecurityElement]::Escape($Ssid)
+    $escapedPwd  = [System.Security.SecurityElement]::Escape($Password)
 
-    # Open Wi-Fi profile with MAC randomization
+    # Decide profile security based on whether password is present
+    $usePassword = -not [string]::IsNullOrWhiteSpace($Password)
+
+    if ($usePassword) {
+        # Basic WPA2-PSK sanity check (typical PSK rules: 8..63 chars for passphrase)
+        if ($Password.Length -lt 8 -or $Password.Length -gt 63) {
+            throw "Password length must be 8..63 characters for WPA2-PSK passphrases."
+        }
+
+        $securityBlock = @"
+    <security>
+        <authEncryption>
+            <authentication>WPA2PSK</authentication>
+            <encryption>AES</encryption>
+            <useOneX>false</useOneX>
+        </authEncryption>
+        <sharedKey>
+            <keyType>passPhrase</keyType>
+            <protected>false</protected>
+            <keyMaterial>$escapedPwd</keyMaterial>
+        </sharedKey>
+    </security>
+"@
+    } else {
+        $securityBlock = @"
+    <security>
+        <authEncryption>
+            <authentication>open</authentication>
+            <encryption>none</encryption>
+            <useOneX>false</useOneX>
+        </authEncryption>
+    </security>
+"@
+    }
+
+    # Build WLAN profile XML
     $xml = @"
 <?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
@@ -38,13 +76,7 @@ function Add-WifiNetwork {
     <connectionType>ESS</connectionType>
     <connectionMode>auto</connectionMode>
     <MSM>
-        <security>
-            <authEncryption>
-                <authentication>open</authentication>
-                <encryption>none</encryption>
-                <useOneX>false</useOneX>
-            </authEncryption>
-        </security>
+$securityBlock
     </MSM>
     <MacRandomization xmlns="http://www.microsoft.com/networking/WLAN/profile/v3">
         <enableRandomization>true</enableRandomization>
@@ -52,15 +84,13 @@ function Add-WifiNetwork {
 </WLANProfile>
 "@
 
-    # Write XML (create.sh role)
+    # Write, import, then always delete the XML
     $xml | Out-File -FilePath $xmlPath -Encoding UTF8 -Force
 
     try {
-        # Import profile (import.ps1 role)
         netsh wlan add profile filename="$xmlPath"
     }
     finally {
-        # Always clean up the XML
         if (Test-Path $xmlPath) {
             Remove-Item -Path $xmlPath -Force
         }
