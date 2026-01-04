@@ -30,6 +30,12 @@ add_wifi_network() {
     fi
 }
 
+# android
+# add_wifi_network() {
+#     # adb shell "am start -n com.steinwurf.adbjoinwifi/.MainActivity -e ssid $ssid" # https://github.com/steinwurf/adb-join-wifi
+#     adb shell "am start -n com.adbwifisettingsmanager/.WifiSettingsManagerActivity --esn newConnection -e ssid $(printf '%q' "$1")" # https://github.com/pr4bh4sh/adb-wifi-setting-manager
+# }
+
 # Temporarily set SELinux to permissive mode
 local old_se=$(getenforce)
 setenforce 0
